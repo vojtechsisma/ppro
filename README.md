@@ -1,160 +1,160 @@
-# Akademie Trutnov – Informační systém pro správu kurzů
+# Hory a voda – Informační systém pro půjčovnu vybavení
 
 Semestrální projekt pro předmět **Pokročilé programování (PPRO)**, FIM UHK (ZS 2026/2027).  
-Zpracováno na základě oficiálního zadání: **Varianta C: Kurzy vzdělávacího centra**.
+Zpracováno na základě oficiálního zadání: **Varianta D: Půjčovna vybavení**.
 
 ---
 
 ## 1. Kontext a výchozí situace
 
 ### 1.1 Klient
-* **Organizace:** Akademie Trutnov
-* **Kontaktní osoba:** Ing. Lucie Bartošová
-* **Zaměření:** Rekvalifikační a firemní kurzy (přibližně 40 kurzů ročně).
-* **Personální obsazení:** Všichni lektoři jsou externisté.
+* **Organizace / Firma:** Hory a voda
+* **Kontaktní osoba / Majitel:** Martin Řehák
+* **Zaměření:** Sezónní půjčovna sportovního vybavení (zima: lyže, snowboardy, boty, hole; léto: lodě, pádla, vesty).
+* **Charakter provozu:** Velmi krátká a intenzivní sezóna, o víkendech se u pultu tvoří fronty, personál je v časovém presu.
 
 ### 1.2 Výchozí stav (Jak to mají dnes)
-* **Příjem přihlášek:** Přihlášky přicházejí z webového formuláře do e-mailu a asistentka je ručně přepisuje do Excel tabulky (jedna záložka pro každý kurz).
-* **Hlídání kapacit:** Kapacita se kontroluje pouze vizuálně („okem“). Pořadník náhradníků se vede jako ruční poznámka tužkou pod seznamem.
-* **Certifikace a osvědčení:** Osvědčení se vypisují ručně v MS Wordu. Číslování se odvozuje odhadem podle toho, kolik jich v daném roce již bylo vystaveno (došlo již k situaci, kdy bylo stejné číslo vydáno dvakrát).
-* **Krizové situace:** Při odřeknutí účastníka na poslední chvíli vzniká chaos – není zřejmé, koho z náhradníků kontaktovat dříve a kdo má přednost.
+* **Evidence vybavení:** Papírový sešit, inventární čísla napsaná lihovým fixem přímo na vybavení.
+* **Příjem rezervací:** Rezervace se přijímají po telefonu a zapisují se na papírové lístečky připíchnuté na nástěnce nad pultem.
+* **Problémy v sezóně:** Často se stane, že je jeden pár lyží slíben dvěma lidem současně.
+* **Krizové řešení na místě:** *„V sobotu ráno nemám čas to řešit, tak vždycky někomu dám něco jiného a slevím.“* – absence přehledu vede k finančním ztrátám a chaosu ve skladu.
 
 ---
 
 ## 2. Analýza požadavků
 
-Dokument zadání člení požadavky do čtyř kategorií podle jejich závaznosti a dopadu na architekturu:
+Dokument zadání člení požadavky do čtyř kategorií podle jejich závaznosti a dopadu na návrh systému:
 
 ### 2.1 Funkční požadavky (Co klient chce – musí být implementováno)
-1. **Správa kurzů:**
-   * Evidence základních údajů kurzu: název, textová anotace, celkový rozsah v hodinách, cena, příznak akreditace (`ano`/`ne`).
-2. **Termíny kurzů:**
-   * Kurz se může opakovat několikrát do roka v různých termínech.
-   * Termín má datum a čas začátku (`od`) a konce (`do`), místo konání (učebna/adresa) a maximální kapacitu.
-   * Kapacita se u stejného kurzu může lišit podle přidělené učebny.
-3. **Lektoři a jejich přiřazení:**
-   * Evidence externích lektorů.
-   * Jeden lektor může vést více různých termínů.
-   * U delších kurzů se na jednom termínu střídají dva lektoři.
-4. **Přihlášky studentů na termíny:**
-   * Evidence studentů/účastníků.
-   * Vztah M:N: jeden student se může účastnit více kurzů, na jednom termínu je zapsáno více studentů.
-5. **Kapacita a pořadník náhradníků:**
-   * Pokud je termín naplněn, další přihlášený zájemce je zařazen do pořadníku s přesným časovým razítkem / pořadovým číslem.
-   * Při uvolnění místa musí systém přesně vědět a indikovat, kdo je na řadě.
-6. **Evidence docházky:**
-   * U vícedenních termínů se eviduje denní docházka jednotlivých účastníků (kdo byl který den přítomen).
-7. **Dokončení kurzu a vydávání osvědčení:**
-   * Na konci termínu se eviduje seznam úspěšných absolventů.
-   * Generování osvědčení s unikátním evidenčním číslem a datem vydání. Číslo osvědčení se nesmí opakovat ani měnit po vydání.
-8. **Přehledy a reporting:**
-   * Přehled vytíženosti / naplněnosti jednotlivých termínů (v procentech i počtech).
-   * Přehled odučených hodin pro jednotlivé lektory.
-   * Přehled studentů, kteří se v daném roce přihlásili na více než jeden kurz.
+1. **Evidence jednotlivých kusů vybavení:**
+   * Každý kus má unikátní inventární číslo, kategorii, velikost (délku lyží, velikost bot apod.), rok pořízení a stav opotřebení.
+   * Kusy jsou evidovány jako samostatné unikátní fyzické entity (dva totožné páry lyží téhož modelu a délky představují dva samostatné záznamy v databázi).
+2. **Kategorie vybavení a vazba na ceny:**
+   * Číselník kategorií: lyže, snowboardy, boty, hole, lodě, vesty atd.
+   * Cenotvorba se odvíjí od kategorie vybavení a délky výpůjčky.
+3. **Evidence zákazníků:**
+   * Jméno, příjmení, telefonní číslo, číslo dokladu totožnosti (OP / pas), výše složené kauce.
+4. **Správa výpůjček:**
+   * Jedna výpůjčka může obsahovat několik různých kusů vybavení (např. kompletní lyžařský set pro rodinu).
+   * Výpůjčka má definované datum a čas `od` a `do`.
+   * Tentýž kus vybavení se v průběhu sezóny půjčuje opakovaně.
+5. **Dopředné rezervace:**
+   * Možnost telefonické rezervace předem (např. v úterý rezervace na víkend).
+6. **Flexibilní a částečné vracení:**
+   * Umožnit vrácení výpůjčky po částech (např. zákazník vrátí lyže v 15:00 a boty si nechá až do 19:00).
+7. **Správa servisu a údržby:**
+   * Možnost odeslat konkrétní kus vybavení do servisu – po dobu servisu je kus blokován a nelze jej půjčit ani rezervovat.
+   * Přehled: co je aktuálně v servisu a jak dlouho oprava trvá.
+8. **Cenové tarify a víkendové sazby:**
+   * Výpočet ceny podle kategorie a počtu dní.
+   * Speciální víkendová sazba: víkend se počítá jako 2 dny, ale zápůjčka začíná již v pátek odpoledne.
+9. **Přehledy a reporting pro majitele:**
+   * Okamžitý přehled: co je právě půjčené venku.
+   * Přehled prodlení: co mělo být vráceno a nebylo (včetně výpočtu penále).
+   * Vytíženost vybavení: jak často se který kus půjčuje (podklad pro rozhodování o nákupu nového vybavení na další sezónu).
 
 ---
 
 ### 2.2 Obchodní pravidla (Na čem klient trvá – systém vynutí bez výjimky)
-* **Integrita kapacity:** Kapacitu termínu **nelze překročit** za žádných okolností (ani ručním zásahem).
-* **Férovost pořadníku:** Pořadí zájemců v pořadníku se **nesmí přeskakovat**.
-* **Auditovatelnost osvědčení:** Číslo osvědčení je přísně unikátní v celém systému a již vydané osvědčení je **neměnné** (imutabilní).
-* **Historie přihlášek:** Zrušená přihláška se **nikdy fyzicky nemaže** z databáze; zůstává dohledatelná se stavem „zrušeno“ (důvod: řešení reklamací a stížností typu „já se přihlásil a vy jste mě smazali“).
+* **Zákaz kolize výpůjček a rezervací:** Jeden konkrétní kus nesmí být ve dvou výpůjčkách nebo rezervacích, které se časově překrývají.
+* **Blokace servisem:** Kus se stavem „v servisu“ nesmí jít půjčit ani zarezervovat na dobu servisu.
+* **Penále za zpoždění:** Za pozdní vrácení po sjednaném termínu se striktně počítá smluvní penále za každý započatý den prodlení.
+* **Zachování historie kusu:** Historie výpůjček konkrétního kusu se **nikdy nemaže** – slouží k řešení reklamací a k vyhodnocení opotřebení při obměně fondu.
 
 ---
 
 ### 2.3 Přání a výhled do budoucna (Co klient prohodil mimochodem)
-* **Fakturační modul:** Aktuálně není požadována plná fakturace, ale architektura a doménový model musí počítat s budoucím napojením (např. vazba ceny přihlášky na fakturu/doklad).
-* **Uživatelská přívětivost:** Rozhraní pro lektory (evidence docházky) musí být intuitivní, minimalistické a přehledné i pro technicky méně zdatné uživatele.
-* **E-mailové notifikace:** Automatické odesílání e-mailů při změně stavu (potvrzení přihlášky, výzva pro náhradníka z pořadníku).
-* **Exporty:** Výhledově export podkladů pro akreditační výkazy MŠMT.
+* **Pultový dashboard (Sobotní ranní špička):** Jedna přehledná obrazovka pro obsluhu u pultu, kde je okamžitě vidět, co je právě volné k výdeji bez nutnosti složitého proklikávání.
+* **Kauce v hotovosti:** Kauce se často skládá v hotovosti u pultu – systém má evidovat výši a stav vratky, ale nemusí řešit bankovní platební bránu.
+* **Ruční slevy majitele:** Možnost administrátora/obsluhy aplikovat ruční položkovou nebo celkovou slevu.
+* **Tisk smluv:** Možnost vygenerovat jednoduchou tiskovou sestavu / smlouvu o výpůjčce k podpisu zákazníkem.
 
 ---
 
 ### 2.4 Povinné technické minimum (Dle pravidel předmětu PPRO)
 * **Architektura:** Striktně třívrstvá architektura se závislostmi orientovanými pouze jedním směrem (Prezentační -> Aplikační/Doménová -> Datová/Infrastrukturní).
-* **Databáze:** Relační databáze (např. PostgreSQL) běžící v kontejneru přes Docker Compose.
-* **Migrace:** Verzované databázové migrace řízené kódem.
-* **Doménový model:** Minimálně 5 doménových entit a alespoň jedna vazba M:N.
-* **Testování:** Sada integračních a jednotkových testů ověřujících obchodní pravidla.
-* **Deployment & běh:** Celý projekt musí být reprodukovatelně spustitelný jediným příkazem:
+* **Databáze:** Relační databáze (PostgreSQL) běžící v Docker kontejneru.
+* **Migrace:** Verzované migrace schématu spravované migračním nástrojem.
+* **Doménový model:** Minimálně 5 entit a alespoň jedna vazba M:N.
+* **Testování:** Sada integračních a jednotkových testů pokrývajících klíčová obchodní pravidla (detekce kolizí, výpočet penále, servisy).
+* **Deployment & běh:** Spustitelné reprodukovatelně pomocí:
   ```bash
   docker compose up
   ```
-* **Bezpečnost dat:** Veškerá data v repozitáři jsou syntetická (žádná reálná osobní data, žádné reálné kontakty, žádné API klíče či přístupová hesla).
-* **Kritické místo návrhu (Kde se návrh láme):** Algoritmus a stavový automat **pořadníku náhradníků** a striktní pravidlo pro **dokončení kurzu a vydání osvědčení**.
+* **Bezpečnost dat:** Syntetická testovací data (žádné reálné osobní údaje, žádné přihlašovací klíče v repozitáři).
+* **Kritické místo návrhu (Kde se návrh láme):** **Rezervace konkrétního kusu proti rezervaci typu/kapacity** a návazný stavový mechanismus částečného vracení a expirace.
 
 ---
 
-## 3. Předběžný doménový model
+## 3. Doménový model a architektura
 
-Na základě funkčních požadavků systém definuje následující klíčové entity a vztahy:
+### 3.1 Seznam doménových entit
 
 | Entita | Popis | Klíčové atributy |
 | :--- | :--- | :--- |
-| **`Course`** | Definice kurzu | `id`, `name`, `annotation`, `hours`, `price`, `is_accredited` |
-| **`CourseTerm`** | Konkrétní běh/termín kurzu | `id`, `course_id`, `start_datetime`, `end_datetime`, `location`, `capacity` |
-| **`Lecturer`** | Externí lektor | `id`, `first_name`, `last_name`, `email`, `phone`, `bio` |
-| **`TermLecturer`** (M:N) | Přiřazení lektorů k termínu | `term_id`, `lecturer_id`, `role`, `allocated_hours` |
-| **`Student`** | Účastník / student | `id`, `first_name`, `last_name`, `email`, `phone`, `created_at` |
-| **`Registration`** | Přihláška studenta na termín | `id`, `term_id`, `student_id`, `status` (*CONFIRMED*, *CANCELLED*, *WAITLIST*), `registered_at` |
-| **`WaitlistEntry`** | Záznam v pořadníku náhradníků | `id`, `term_id`, `student_id`, `position`, `status` (*WAITING*, *OFFERED*, *EXPIRED*, *ACCEPTED*), `created_at` |
-| **`AttendanceDay`** | Kalendářní výukový den termínu | `id`, `term_id`, `date`, `topic` |
-| **`AttendanceRecord`** | Účast studenta v daný den | `id`, `attendance_day_id`, `student_id`, `is_present`, `note` |
-| **`Certificate`** | Vydané osvědčení o absolvování | `id`, `registration_id`, `certificate_number` (unikátní), `issue_date` |
+| **`Category`** | Kategorie vybavení | `id`, `name`, `code`, `base_daily_rate`, `weekend_rate` |
+| **`EquipmentItem`** | Konkrétní fyzický kus | `id`, `category_id`, `inventory_number` (unikátní), `model_name`, `size`, `year_acquired`, `wear_condition`, `status` (*AVAILABLE*, *RENTED*, *IN_SERVICE*, *RETIRED*) |
+| **`Customer`** | Zákazník | `id`, `first_name`, `last_name`, `phone`, `id_document_number`, `created_at` |
+| **`Rental`** | Výpůjčka | `id`, `customer_id`, `created_at`, `planned_start`, `planned_end`, `deposit_amount`, `discount_amount`, `status` (*ACTIVE*, *RETURNED_PARTIAL*, *COMPLETED*, *OVERDUE*) |
+| **`RentalItem`** (M:N) | Položka výpůjčky (konkrétní kus ve výpůjčce) | `id`, `rental_id`, `equipment_item_id`, `unit_daily_price`, `actual_returned_at`, `late_fee`, `status` (*RENTED*, *RETURNED*, *DAMAGED*), `damage_notes` |
+| **`Reservation`** | Rezervace na termín | `id`, `customer_id`, `created_at`, `reserved_from`, `reserved_to`, `expires_at`, `status` (*PENDING*, *CONFIRMED*, *FULFILLED*, *EXPIRED*, *CANCELLED*) |
+| **`ReservationItem`** | Požadavek v rezervaci (typ/velikost vs. konkrétní kus) | `id`, `reservation_id`, `category_id`, `size_specification`, `equipment_item_id` (volitelně konkrétní kus), `allocated_at` |
+| **`ServiceRecord`** | Servisní odstávka / oprava | `id`, `equipment_item_id`, `started_at`, `finished_at`, `reason`, `cost`, `performed_by` |
+
+### 3.2 Vztahy mezi entitami (ER Diagram)
 
 ```mermaid
 erDiagram
-    Course ||--o{ CourseTerm : "má vypsané"
-    CourseTerm ||--|{ TermLecturer : "veden"
-    Lecturer ||--|{ TermLecturer : "přiřazen"
-    CourseTerm ||--o{ Registration : "přijímá"
-    Student ||--o{ Registration : "vytváří"
-    CourseTerm ||--o{ WaitlistEntry : "eviduje náhradníky"
-    Student ||--o{ WaitlistEntry : "čeká v"
-    CourseTerm ||--o{ AttendanceDay : "skládá se z"
-    AttendanceDay ||--o{ AttendanceRecord : "zaznamenává"
-    Student ||--o{ AttendanceRecord : "má záznam"
-    Registration ||--o| Certificate : "získává při úspěchu"
+    Category ||--o{ EquipmentItem : "obsahuje"
+    Category ||--o{ ReservationItem : "definuje typ"
+    Customer ||--o{ Rental : "má sjednané"
+    Customer ||--o{ Reservation : "vytváří"
+    Rental ||--|{ RentalItem : "obsahuje položky"
+    EquipmentItem ||--o{ RentalItem : "je půjčován přes"
+    Reservation ||--|{ ReservationItem : "má položky"
+    EquipmentItem ||--o{ ReservationItem : "je alokován pro"
+    EquipmentItem ||--o{ ServiceRecord : "má záznamy servisu"
 ```
 
 ---
 
 ## 4. Sekce Rozhodnutí (Architektonický a procesní deník)
 
-> Tato sekce slouží jako oficiální protokol architektonických a procesních rozhodnutí k otevřeným bodům ze zadání klienta i průběžným dohodám. Zápisy jsou stručné, jednoznačné a uvádějí důvod volby.
+> Tato sekce slouží jako oficiální záznam architektonických, procesních a analytických rozhodnutí. Každý otevřený bod obsahuje formulaci problému, přijaté řešení a jednoznačné odůvodnění.
 
 ### 4.1 Otevřené body ze zadání klienta
 
-#### Rozhodnutí č. 1: Kdo rozhoduje o dokončení kurzu a vydání osvědčení
-* **Formulace problému:** Klient váhá, zda je kritériem dokončení kurzu striktně 70% docházka, nebo subjektivní posouzení lektorem.
-* **Rozhodnutí:** Pro možnost úspěšného dokončení kurzu je **povinnou systémovou podmínkou splnění minimálně 70 % evidované docházky**. Následně lektor (nebo administrátor) v systému provede finální potvrzení způsobilosti studenta a potvrdí vystavení osvědčení.
-* **Odůvodnění:** Automatická kontrola docházky eliminuje neoprávněné vydání akreditovaného certifikátu neaktivním studentům, zatímco finální potvrzení lektorem zachovává odbornou garanci kvality výuky.
+#### Rozhodnutí č. 1: Rezervace konkrétního kusu vs. rezervace typu/kapacity (Kde se návrh láme)
+* **Formulace problému:** Zákazník při telefonátu požaduje např. „lyže 170 cm a boty 43“, nikoliv konkrétní inventární číslo 412. Klient nedokáže rozlišit, zda rezervovat konkrétní kus, nebo držet kapacitní kvótu v dané kategorii a velikosti.
+* **Rozhodnutí:** Rezervace se standardně zakládá na **kategorii a velikostní specifikaci (typ/kapacita)**. Systém při rezervaci garantuje disponibilitu v rámci časového okna rezervací kapacitní kvóty. Přiřazení konkrétního fyzického kusu s inventárním číslem probíhá **až při fyzickém výdeji u pultu** (převod rezervace na výpůjčku). Systém volitelně umožňuje administrátorovi přiřadit konkrétní kus předem (např. pro prémiové modely či VIP zákazníky).
+* **Odůvodnění:** O ranní sobotní špičce personál nemůže ztrácet čas hledáním konkrétního páru lyží ze včerejšího lístečku, pokud vedle stojí identický volný pár. Navíc přiřazení konkrétního kusu dopředu by způsobilo zbytečné blokace při zpožděném vrácení či náhlé nutnosti servisu.
 
-#### Rozhodnutí č. 2: Posun v pořadníku při uvolnění kapacity
-* **Formulace problému:** Není ujasněno, zda se náhradník z pořadníku zapíše automaticky sám, nebo zda probíhá potvrzovací proces a jak řešit nezájem náhradníka.
-* **Rozhodnutí:** Po uvolnění kapacity systém **automaticky osloví prvního náhradníka v pořadníku** a přepne jeho stav do `OFFERED` s časovým oknem na potvrzení (např. 24 hodin). Pokud náhradník účast potvrdí, přihláška se stane platnou (`CONFIRMED`); pokud lhůta vyprší nebo zájemce odmítne (`REJECTED`), systém nabídne místo dalšímu v pořadí.
-* **Odůvodnění:** Automatické zapsání bez vědomí studenta by vedlo k neobsazeným místům a vymáhání plateb od lidí, kteří si mezitím zařídili jiný program. Manuální obvolávání by naopak neřešilo přetížení personálu.
+#### Rozhodnutí č. 2: Časová platnost rezervace a expirace (Propadnutí)
+* **Formulace problému:** Klient ví, že ranní rezervace drží „do desíti“, ale neví, co se stane v 10:05 a zda má systém zasáhnout automaticky.
+* **Rozhodnutí:** Každá rezervace má definován mezní čas vyzvednutí (např. 10:00) a systémem stanovené **toleranční okno 30 minut** (do 10:30). Po uplynutí tolerančního okna systém rezervaci automaticky označí jako `EXPIRED` a uvolní kapacitní blokaci pro zákazníky stojící ve frontě. Obsluha má možnost u konkrétní rezervace jedním kliknutím prodloužit lhůtu (např. když zákazník zavolá, že stojí v koloně).
+* **Odůvodnění:** Okamžité striktní smazání v 10:01 by vyvolávalo konflikty při drobném zpoždění na cestě. Naopak držení bez expirace by blokovalo vybavení v nejvytíženější části dne na úkor platících zákazníků u pultu.
 
-#### Rozhodnutí č. 3: Zápis studenta na dva termíny téhož kurzu současně
-* **Formulace problému:** Klient nespecifikoval, zda se student smí přihlásit na dva termíny stejného kurzu současně.
-* **Rozhodnutí:** Student **nemůže mít dvě aktivní potvrzené přihlášky (`CONFIRMED`) na tentýž kurz současně**. Je však povoleno mít jednu potvrzenou přihlášku a zároveň být evidován v pořadníku náhradníků na dřívější či alternativní termín (přičemž při akceptaci náhradního termínu původní rezervace zaniká).
-* **Odůvodnění:** Zabraňuje se spekulativnímu blokování omezených kapacit učeben jedním účastníkem na úkor ostatních zájemců.
+#### Rozhodnutí č. 3: Evidence poškození vybavení a finanční vypořádání
+* **Formulace problému:** Poškození dnes personál drží v hlavě; není dořešeno, zda se váže ke kusu, k výpůjčce, nebo ke kauci.
+* **Rozhodnutí:** Poškození se zaznamenává k **položce výpůjčky (`RentalItem`) s fotodokumentací/popisem** a zároveň propisuje změnu stavu do profilu fyzického kusu (`EquipmentItem.wear_condition`). Vypočtená škoda se primárně odečítá z hotovostní či blokované kauce zákazníka u dané výpůjčky. Pokud poškození brání dalšímu bezpečnému provozu, kus se automaticky přepne do stavu `IN_SERVICE` a vytvoří se záznam v `ServiceRecord`.
+* **Odůvodnění:** Tento postup provazuje finanční nárok vůči zákazníkovi (zadržení kauce) s provozní evidencí údržby a celkovou životností investice (TCO kusu pro budoucí obměnu).
 
-#### Rozhodnutí č. 4: Přihlašování studentů po zahájení termínu kurzu
-* **Formulace problému:** Základní pravidlo zakazuje přihlášení po začátku, ale klient zmínil existenci individuálních výjimek.
-* **Rozhodnutí:** Běžné uživatelské rozhraní **neumožňuje zápis po datu zahájení termínu**. Zápis po zahájení může provést výhradně administrátor/recepce formou explicitní výjimky, a to nejpozději do ukončení prvního výukového dne, za předpokladu volné kapacity a garance, že student i při zmeškání úvodní části stále může dosáhnout požadovaných 70 % docházky.
-* **Odůvodnění:** Zachovává se disciplína systému, zamezí se svévolnému zápisu v průběhu kurzu, ale management centra neztrácí možnost flexibilně vyřešit ojedinělé klientské situace v souladu s akreditačními standardy.
+#### Rozhodnutí č. 4: Částečné vracení a kalkulace penále
+* **Formulace problému:** Není ujasněno, zda výpůjčka zůstává otevřená až do vrácení posledního kusu, nebo se dělí na samostatné stavy pro každý kus, a jak se v takovém případě účtuje penále.
+* **Rozhodnutí:** Každý kus ve výpůjčce (`RentalItem`) má svůj **vlastní nezávislý stav a čas vrácení**. Celková výpůjčka přechází do stavu `RETURNED_PARTIAL`, dokud nejsou vráceny všechny kusy. Penále za pozdní vrácení se počítá **výhradně za zpožděné kusy a jejich započaté dny prodlení**, nikoliv za celou původní výpůjčku.
+* **Odůvodnění:** Penalizovat zákazníka za lyže, které poctivě vrátil v poledne, jen proto, že si boty ponechal do večera, je z obchodního i právního hlediska neudržitelné a vedlo by ke sporům.
 
-#### Rozhodnutí č. 5: Střídání lektorů a rozpad odučených hodin
-* **Formulace problému:** U delších kurzů se střídají dva lektoři, ale v reportech klient zmiňuje hodiny „na lektora termínu“, jako by byl jen jeden.
-* **Rozhodnutí:** Datový model realizuje přiřazení lektorů k termínu vazební entitou `TermLecturer` s uvedením podílu či konkrétních výukových dnů/hodin. Ve výkazech se lektorovi započítávají **skutečně jemu přidělené odučené hodiny** (nikoliv plný počet hodin celého termínu oběma lektorům).
-* **Odůvodnění:** Klient platí lektory na základě odučených hodin. Započtení plných hodin oběma lektorům by zkreslilo finanční a mzdové podklady pro externisty.
+#### Rozhodnutí č. 5: Změna ceníku během sezóny a garance sjednaných cen
+* **Formulace problému:** Klient potřebuje během sezóny flexibilně upravovat ceny (např. před jarními prázdninami), ale trvá na tom, že již uzavřené smlouvy a rezervace musí platit v původních cenách.
+* **Rozhodnutí:** Ceník má verzovanou platnost s časovou platností od-do. V okamžiku vytvoření rezervace nebo výpůjčky se sjednaná denní cena **natvrdo zkopíruje (snapshot) do záznamu položky (`RentalItem.unit_daily_price` a `ReservationItem`)**.
+* **Odůvodnění:** Změna globální sazby v kategorii se tím projeví pouze na nově vytvářené poptávky, zatímco existující smlouvy, rozpracované výpůjčky i historické účetní statistiky zůstávají neměnné.
 
 ---
 
-### 4.2 Průběžný protokol dalších rozhodnutí
-*(Zde budou chronologicky doplňována další rozhodnutí vzniklá během vývoje nebo konzultací s klientem/vyučujícím.)*
+### 4.2 Průběžný protokol projektových rozhodnutí
 
 | Datum | Oblast / Téma | Rozhodnutí a zdůvodnění | Stav |
 | :--- | :--- | :--- | :--- |
-| **05. 10. 2026** | **Inicializace projektu** | Založen Git repozitář, vybrána Varianta C (Akademie Trutnov), sepsána výchozí technická specifikace a definováno 5 základních architektonických rozhodnutí. | **Schváleno** |
+| **05. 10. 2026** | **Výběr tématu projektu** | Původně zvažována Varianta C. Na základě rozhodnutí studenta/týmu byla zvolena **Varianta D: Půjčovna vybavení (Hory a voda)**. Dokumentace kompletně přepracována. | **Schváleno** |
+| **05. 10. 2026** | **Architektura & Model** | Schválen doménový model o 8 entitách s podporou částečného vracení, servisního modulu a hybridní rezervace (kapacitní rezervace s přiřazením kusu u pultu). | **Schváleno** |
+| **05. 10. 2026** | **Infrastruktura** | Založen Git repozitář s `.gitignore`, zvolen Docker Compose pro orchestraci aplikace a relační databáze (PostgreSQL). | **Schváleno** |
