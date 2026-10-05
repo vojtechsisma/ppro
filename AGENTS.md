@@ -69,6 +69,7 @@ Při implementaci jakékoli funkce musí agent garantovat následující invaria
 * Zápis musí obsahovat: Datum, oblast/téma, stručné rozhodnutí + odůvodnění a stav.
 
 ### 4.2 Git a konvence commitů
+* **Striktní zákaz pushování:** Agent **nesmí za žádných okolností provádět `git push`** do vzdáleného repozitáře bez výslovného a explicitního pokynu od vývojáře. Veškeré změny a commity zůstávají výhradně lokální.
 * Používat konvenci **Conventional Commits**:
   * `feat:` nová funkcionalita
   * `fix:` oprava chyby
