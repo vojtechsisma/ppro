@@ -1,0 +1,17 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# IDE and Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment & Credentials
+.env
+.env.local
+*.log
+
+# Docker
+docker-compose.override.yml
