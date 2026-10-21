@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zákazníci | Hory a voda</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 74 100'%3E%3Crect width='74' height='100' rx='5.9' ry='6' fill='%231F6B7A'/%3E%3Ccircle cx='37' cy='15.5' r='5.5' fill='%23F7F5F0'/%3E%3Cpolygon points='11.84,70 31.97,42.4 41.03,55.6 48.07,49 62.16,70' fill='%23fff'/%3E%3Crect x='11.84' y='77' width='50.32' height='4.5' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="/" class="topbar-brand" aria-label="Hory a voda – přehled">
+      <span class="mark" aria-hidden="true"><i></i></span>
+      <span class="wordmark-name">Hory a voda</span>
+    </a>
+    <nav class="topnav" aria-label="Hlavní navigace">
+      <a href="/">Přehled</a>
+      <a href="/customers.html" aria-current="page">Zákazníci</a>
+      <a href="/categories.html">Ceník</a>
+    </nav>
+    <span class="topbar-clock" id="topbarClock"></span>
+    <div class="topbar-user">
+      <span class="user-name" id="userNameDisplay"></span>
+      <button id="logoutBtn" class="hv-btn hv-btn--ghost">Odhlásit</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1 class="hv-display page-title">Zákazníci</h1>
+        <p class="page-sub">Evidence zákazníků pro smlouvy o výpůjčce.</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <label class="search-field">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/>
+        </svg>
+        <input type="search" id="customerSearchInput" class="hv-input" placeholder="Jméno, příjmení nebo telefon" aria-label="Hledat zákazníka">
+      </label>
+    </div>
+
+    <section class="hv-card">
+      <div class="table-scroll">
+        <table class="hv-table">
+          <thead>
+            <tr>
+              <th>Příjmení a jméno</th>
+              <th>Telefon</th>
+              <th>Doklad</th>
+              <th>V evidenci od</th>
+            </tr>
+          </thead>
+          <tbody id="customerTableBody">
+            <tr><td colspan="4" class="table-message">Načítám…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/customers.js"></script>
+</body>
+</html>

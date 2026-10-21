@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Přihlášení | Hory a voda</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 74 100'%3E%3Crect width='74' height='100' rx='5.9' ry='6' fill='%231F6B7A'/%3E%3Ccircle cx='37' cy='15.5' r='5.5' fill='%23F7F5F0'/%3E%3Cpolygon points='11.84,70 31.97,42.4 41.03,55.6 48.07,49 62.16,70' fill='%23fff'/%3E%3Crect x='11.84' y='77' width='50.32' height='4.5' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <span class="mark" aria-hidden="true"><i></i></span>
+        <span class="wordmark">
+          <span class="wordmark-name">Hory a voda</span>
+          <span class="wordmark-caption">Půjčovna vybavení</span>
+        </span>
+      </div>
+
+      <div class="auth-panel">
+        <div class="auth-head">
+          <h1 class="auth-title">Přihlášení k pultu</h1>
+          <p class="auth-subtitle">Pro personál půjčovny.</p>
+        </div>
+
+        <div id="errorAlert" class="alert alert-danger"></div>
+
+        <form id="loginForm" class="auth-form">
+          <label class="hv-field">
+            <span class="hv-label">Uživatelské jméno</span>
+            <input type="text" id="usernameInput" name="username" class="hv-input" required autocomplete="username" autofocus>
+          </label>
+
+          <label class="hv-field">
+            <span class="hv-label">Heslo</span>
+            <input type="password" id="passwordInput" name="password" class="hv-input" required autocomplete="current-password">
+          </label>
+
+          <button type="submit" id="loginSubmitBtn" class="hv-btn hv-btn--primary hv-btn--lg hv-btn--block">Přihlásit</button>
+        </form>
+      </div>
+
+      <div class="auth-demo">
+        <span class="hv-eyebrow">Testovací účty</span>
+        <span class="auth-demo-row">Správce <span><code>admin</code> / <code>admin123</code></span></span>
+        <span class="auth-demo-row">Pult <span><code>recepce</code> / <code>recepce123</code></span></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Pokud již token existuje, ověříme jeho platnost a případně rovnou přesměrujeme
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(res => {
+        if (res.ok) window.location.href = '/';
+      });
+    }
+
+    const form = document.getElementById('loginForm');
+    const alertBox = document.getElementById('errorAlert');
+    const submitBtn = document.getElementById('loginSubmitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.style.display = 'none';
+      submitBtn.disabled = true;
+
+      const formData = new URLSearchParams();
+      formData.append('username', document.getElementById('usernameInput').value);
+      formData.append('password', document.getElementById('passwordInput').value);
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Přihlášení se nezdařilo.');
+        }
+
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user_info', JSON.stringify(data.user));
+
+        window.location.href = '/';
+      } catch (err) {
+        alertBox.textContent = err.message;
+        alertBox.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

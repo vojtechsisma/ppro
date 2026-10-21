@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Přehled | Hory a voda</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 74 100'%3E%3Crect width='74' height='100' rx='5.9' ry='6' fill='%231F6B7A'/%3E%3Ccircle cx='37' cy='15.5' r='5.5' fill='%23F7F5F0'/%3E%3Cpolygon points='11.84,70 31.97,42.4 41.03,55.6 48.07,49 62.16,70' fill='%23fff'/%3E%3Crect x='11.84' y='77' width='50.32' height='4.5' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="/" class="topbar-brand" aria-label="Hory a voda – přehled">
+      <span class="mark" aria-hidden="true"><i></i></span>
+      <span class="wordmark-name">Hory a voda</span>
+    </a>
+    <nav class="topnav" aria-label="Hlavní navigace">
+      <a href="/" aria-current="page">Přehled</a>
+      <a href="/customers.html">Zákazníci</a>
+      <a href="/categories.html">Ceník</a>
+    </nav>
+    <span class="topbar-clock" id="topbarClock"></span>
+    <div class="topbar-user">
+      <span class="user-name" id="userNameDisplay"></span>
+      <button id="logoutBtn" class="hv-btn hv-btn--ghost">Odhlásit</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1 class="hv-display page-title">Přehled</h1>
+        <p class="page-sub" id="boardSummary">Načítám…</p>
+      </div>
+      <button id="openAddModalBtn" class="hv-btn hv-btn--primary hv-btn--lg">Přidat kus</button>
+    </div>
+
+    <div class="board">
+      <section class="board-main" aria-label="Vybavení">
+        <div class="cat-tabs" id="categoryTabs" role="group" aria-label="Kategorie"></div>
+
+        <div class="board-tools">
+          <label class="search-field">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+              <circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/>
+            </svg>
+            <input type="search" id="searchInput" class="hv-input" placeholder="Inventární číslo nebo model" aria-label="Hledat kus">
+          </label>
+          <button type="button" id="onlyFreeBtn" class="hv-btn hv-btn--secondary toggle-btn" aria-pressed="false">Jen volné</button>
+        </div>
+
+        <div class="size-strip" id="sizeStrip" aria-label="Volné kusy podle velikosti"></div>
+
+        <div class="tag-grid" id="tagGrid">
+          <div class="board-empty">Načítám…</div>
+        </div>
+      </section>
+
+      <aside class="rail" aria-label="Detail a souhrn">
+        <section class="rail-section" id="itemDetail" hidden aria-live="polite"></section>
+
+        <section class="rail-section">
+          <div class="rail-head">
+            <span class="rail-title">Stav fondu</span>
+            <span class="hv-eyebrow">všechny kategorie</span>
+          </div>
+          <div id="statusSummary"></div>
+        </section>
+
+        <section class="rail-section" id="railHint">
+          <span class="rail-hint">Klikněte na visačku a zobrazí se detail kusu s akcemi.</span>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <div id="equipmentModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Nový kus</h3>
+        <button id="closeModalBtn" class="modal-close" aria-label="Zavřít">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+            <path d="m4 4 8 8M12 4l-8 8"/>
+          </svg>
+        </button>
+      </div>
+
+      <form id="equipmentForm">
+        <div class="modal-body">
+          <div id="modalAlert" class="alert alert-danger"></div>
+          <input type="hidden" id="editItemId" value="">
+
+          <div class="form-grid">
+            <label class="hv-field span-2" id="formGroupCategory">
+              <span class="hv-label">Kategorie</span>
+              <select id="formCategory" class="hv-input" required></select>
+            </label>
+
+            <label class="hv-field" id="formGroupInvNumber">
+              <span class="hv-label">Inventární číslo</span>
+              <input type="text" id="formInvNumber" class="hv-input num" placeholder="SKI-101" required>
+            </label>
+
+            <label class="hv-field" id="formGroupYear">
+              <span class="hv-label">Rok pořízení</span>
+              <input type="number" id="formYear" class="hv-input num" min="2000" max="2100" required>
+            </label>
+
+            <label class="hv-field span-2">
+              <span class="hv-label">Model</span>
+              <input type="text" id="formModelName" class="hv-input" placeholder="Atomic Redster G9" required>
+            </label>
+
+            <label class="hv-field">
+              <span class="hv-label">Velikost</span>
+              <input type="text" id="formSize" class="hv-input num" placeholder="165 cm" required>
+            </label>
+
+            <label class="hv-field">
+              <span class="hv-label">Opotřebení</span>
+              <select id="formWear" class="hv-input">
+                <option value="NEW">Nový</option>
+                <option value="EXCELLENT">Výborný</option>
+                <option value="GOOD" selected>Dobrý</option>
+                <option value="FAIR">Opotřebený</option>
+                <option value="DAMAGED">Poškozený</option>
+              </select>
+            </label>
+
+            <label class="hv-field span-2" id="formGroupStatus">
+              <span class="hv-label">Stav</span>
+              <select id="formStatus" class="hv-input">
+                <option value="AVAILABLE" selected>Volné</option>
+                <option value="RENTED">Venku</option>
+                <option value="IN_SERVICE">Servis</option>
+                <option value="RETIRED">Vyřazeno</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelModalBtn" class="hv-btn hv-btn--ghost">Zrušit</button>
+          <button type="submit" id="saveItemBtn" class="hv-btn hv-btn--primary">Uložit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
