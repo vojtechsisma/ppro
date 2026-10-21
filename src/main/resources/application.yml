@@ -1,0 +1,48 @@
+# Konfigurace aplikace Hory a voda.
+# Veškeré citlivé hodnoty se předávají environmentálními proměnnými (viz .env.example).
+# Při lokálním spuštění (./mvnw spring-boot:run) se proměnné načtou i ze souboru .env v kořeni projektu.
+spring:
+  application:
+    name: horyavoda
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:horyavoda}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Schéma spravuje výhradně Flyway; Hibernate jej pouze ověřuje proti entitám.
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    # API používá snake_case (kompatibilita s frontendem: inventory_number, access_token, ...)
+    property-naming-strategy: SNAKE_CASE
+
+server:
+  port: ${SERVER_PORT:8000}
+
+app:
+  security:
+    jwt-secret: ${SECRET_KEY}
+    access-token-expire-minutes: ${ACCESS_TOKEN_EXPIRE_MINUTES:480}
+  seed:
+    # Naplnění databáze syntetickými daty při startu (jen pokud jsou tabulky prázdné).
+    enabled: ${SEED_ENABLED:true}
+    admin-password: ${SEED_ADMIN_PASSWORD:}
+    staff-password: ${SEED_STAFF_PASSWORD:}
+
+springdoc:
+  swagger-ui:
+    path: /docs
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

@@ -1,0 +1,12 @@
+# Vývojový profil (./mvnw spring-boot:run -Dspring-boot.run.profiles=dev)
+# Frontend se servíruje přímo ze zdrojů – úprava HTML/CSS/JS je vidět po obnovení stránky bez restartu.
+# Změny v Javě po překompilování (./mvnw compile, případně automaticky z IDE) restartuje DevTools.
+spring:
+  web:
+    resources:
+      static-locations: file:src/main/resources/static/
+      cache:
+        period: 0
+  devtools:
+    restart:
+      exclude: static/**
