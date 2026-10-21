@@ -1,0 +1,12 @@
+# Testovací profil: in-memory H2 v režimu PostgreSQL, schéma vytváří stejné Flyway migrace jako produkce.
+spring:
+  datasource:
+    url: jdbc:h2:mem:horyavoda_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+
+app:
+  security:
+    jwt-secret: test-only-secret-key-with-at-least-32-bytes-for-hs256
+  seed:
+    enabled: false
