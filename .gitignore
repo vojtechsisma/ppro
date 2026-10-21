@@ -15,3 +15,8 @@ Thumbs.db
 
 # Docker
 docker-compose.override.yml
+
+# Java / Maven
+target/
+*.class
+HELP.md
