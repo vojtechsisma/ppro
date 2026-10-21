@@ -86,6 +86,16 @@ Dokument zadání člení požadavky do čtyř kategorií podle jejich závaznos
 
 ---
 
+### 2.5 Připomínky klienta (průběžně během vývoje)
+
+Požadavky a změny, se kterými klient přichází v průběhu vývoje (mimo původní zadání).
+
+| Datum | Připomínka klienta | Reakce / stav |
+| :--- | :--- | :--- |
+| **19. 10. 2026** | **Unikátní design, ne jako od AI.** Klient nechce rozhraní, které vypadá jako typická generovaná šablona; má působit jako nástroj vytvořený přímo pro jeho půjčovnu. | Zachováno rozvržení pultového přehledu, upraveno provedení: systémové bezpatkové písmo, odstíny zelené (smrková zeleň jako jediný akcent, světlé povrchy s nádechem šalvěje), popisky v běžné češtině bez technických kódů, žádné emoji ani dekorativní přechody. **Průběžně – zapracováno.** |
+
+---
+
 ## 3. Doménový model a architektura
 
 ### 3.1 Seznam doménových entit
@@ -114,6 +124,33 @@ erDiagram
     Reservation ||--|{ ReservationItem : "má položky"
     EquipmentItem ||--o{ ReservationItem : "je alokován pro"
     EquipmentItem ||--o{ ServiceRecord : "má záznamy servisu"
+```
+
+---
+
+### 3.3 Technologický stack a spuštění
+
+| Vrstva | Technologie |
+| :--- | :--- |
+| Jazyk a build | Java 21 (LTS), Maven (Maven Wrapper `./mvnw`) |
+| Framework | Spring Boot 4.1 (Spring MVC, Spring Data JPA, Spring Security) |
+| Databáze a migrace | PostgreSQL 16, Flyway (`src/main/resources/db/migration`) |
+| Autentizace | JWT Bearer token (HS256), hesla hashovaná bcryptem |
+| Dokumentace API | springdoc OpenAPI – Swagger UI na `/docs` |
+| Testy | JUnit 5, MockMvc, H2 (režim PostgreSQL) |
+
+**Spuštění celého systému (aplikace + databáze):**
+```bash
+docker compose up
+```
+Aplikace poběží na <http://localhost:8000> (Swagger UI: <http://localhost:8000/docs>). Při startu se automaticky provedou migrace a nahrají syntetická data.
+
+**Lokální vývoj bez kontejneru aplikace:**
+```bash
+cp .env.example .env          # jednorázově; POSTGRES_HOST=localhost
+docker compose up db          # jen databáze
+./mvnw spring-boot:run        # aplikace načte proměnné z .env
+./mvnw test                   # testy (nevyžadují Docker)
 ```
 
 ---
@@ -158,3 +195,8 @@ erDiagram
 | **05. 10. 2026** | **Výběr tématu projektu** | Původně zvažována Varianta C. Na základě rozhodnutí studenta/týmu byla zvolena **Varianta D: Půjčovna vybavení (Hory a voda)**. Dokumentace kompletně přepracována. | **Schváleno** |
 | **05. 10. 2026** | **Architektura & Model** | Schválen doménový model o 8 entitách s podporou částečného vracení, servisního modulu a hybridní rezervace (kapacitní rezervace s přiřazením kusu u pultu). | **Schváleno** |
 | **05. 10. 2026** | **Infrastruktura** | Založen Git repozitář s `.gitignore`, zvolen Docker Compose pro orchestraci aplikace a relační databáze (PostgreSQL). | **Schváleno** |
+| **19. 10. 2026** | **Technologický stack** | Zvolena **Java 21 (LTS), Spring Boot 4.1, Maven (Maven Wrapper)**, Spring Data JPA / Hibernate (ORM), **Flyway** (verzované migrace), PostgreSQL 16, Spring Security (OAuth2 Resource Server, JWT HS256, bcrypt) a springdoc OpenAPI (Swagger UI na `/docs`). Nahrazuje původně zvažovaný Python/FastAPI – silné statické typování, standardní třívrstvé uspořádání Spring aplikací a vyspělý ekosystém pro migrace a testy. | **Schváleno** |
+| **19. 10. 2026** | **Vrstvy a balíčky** | `presentation` (REST controllery, DTO, bezpečnost webu) → `application` (služby, transakce) → `infrastructure` (Spring Data repozitáře, JWT, seed) nad doménovým modelem `domain` (entity, výčty, doménové výjimky). Controllery nikdy nevolají repozitáře přímo; entity se ven z API vrací jen jako DTO. | **Schváleno** |
+| **19. 10. 2026** | **Výčtové typy v DB** | Stavy (`status`, `role`, `wear_condition`) jsou uloženy jako `VARCHAR` s `CHECK` omezením místo nativních PostgreSQL enumů – stejná migrace běží na PostgreSQL i v testovací H2 a přidání hodnoty je prostá migrace. | **Schváleno** |
+| **19. 10. 2026** | **Testování** | Integrační testy API (JUnit 5 + MockMvc) běží nad in-memory H2 v režimu PostgreSQL se **stejnými Flyway migracemi** jako produkce; Hibernate schéma validuje (`ddl-auto=validate`). Testy nevyžadují Docker. | **Schváleno** |
+| **20. 10. 2026** | **Design systém UI** | Frontend převeden na vlastní příručku značky „Hory a voda brand system“ (Claude Design, `HoryAVoda-DesignSystem v2`): teplý papír, tuš a jediná barva značky „jezero“ `#1F6B7A`; barva jinak kóduje stav kusu (volné / venku / servis / vyřazeno) vždy spolu s textem. Písmo Archivo (text, titulky) a Space Grotesk s tabulkovými číslicemi (inventární čísla, velikosti, ceny). Znak = inventární visačka (jen CSS). Hlavní obrazovka „Přehled“ ukazuje kusy jako visačky po kategoriích s počtem volných podle velikosti a detailem kusu v pravém panelu. Nahrazuje předchozí zelenou paletu a systémové písmo. | **Schváleno** |
