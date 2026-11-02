@@ -796,7 +796,8 @@ select.hv-input {
   .topbar-clock { display: none; }
 }
 
-@media (max-width: 640px) {
+/* Pod 750 px se navigace schová pod tlačítko Menu */
+@media (max-width: 750px) {
   .topbar { gap: var(--sp-3); padding: 0 var(--sp-4); }
   .topbar-toggle { display: inline-flex; }
 
@@ -839,6 +840,9 @@ select.hv-input {
     border-left: none;
   }
   .topbar .topbar-user .hv-btn--ghost { height: var(--hit-min); font-size: var(--fs-14); }
+}
+
+@media (max-width: 640px) {
   .page { padding: var(--sp-5) var(--sp-4) var(--sp-7); }
   .page-title { font-size: var(--fs-24); }
   .board-main, .rail { padding: var(--sp-4); }
