@@ -34,6 +34,8 @@ app:
     enabled: ${SEED_ENABLED:true}
     admin-password: ${SEED_ADMIN_PASSWORD:}
     staff-password: ${SEED_STAFF_PASSWORD:}
+    # Ukázkový provoz (výpůjčky, rezervace) – jen pokud ještě žádná výpůjčka ani rezervace neexistuje.
+    demo-data: ${SEED_DEMO_DATA:true}
 
 springdoc:
   swagger-ui:

@@ -10,3 +10,6 @@ app:
     jwt-secret: test-only-secret-key-with-at-least-32-bytes-for-hs256
   seed:
     enabled: false
+  # Propadání rezervací testy volají přímo, s pevnými hodinami
+  reservations:
+    expiry-job-enabled: false

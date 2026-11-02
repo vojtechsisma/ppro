@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /** Výpůjčky (vyžaduje přihlášení – obsahují osobní údaje zákazníků). Výpůjčky se nemažou. */
@@ -23,20 +25,23 @@ import java.util.List;
 public class RentalController {
 
     private final RentalService rentalService;
+    private final Clock clock;
 
-    public RentalController(RentalService rentalService) {
+    public RentalController(RentalService rentalService, Clock clock) {
         this.rentalService = rentalService;
+        this.clock = clock;
     }
 
     /** Seznam výpůjček; s {@code equipment_item_id} historie jednoho kusu. */
     @GetMapping
     public List<RentalResponse> listRentals(@RequestParam(name = "equipment_item_id", required = false) Long equipmentItemId) {
-        return rentalService.listRentals(equipmentItemId).stream().map(RentalResponse::from).toList();
+        LocalDateTime now = LocalDateTime.now(clock);
+        return rentalService.listRentals(equipmentItemId).stream().map(rental -> RentalResponse.from(rental, now)).toList();
     }
 
     @GetMapping("/{rentalId}")
     public RentalResponse getRental(@PathVariable long rentalId) {
-        return RentalResponse.from(rentalService.getRental(rentalId));
+        return RentalResponse.from(rentalService.getRental(rentalId), LocalDateTime.now(clock));
     }
 
     /** Sjednání výpůjčky; při překryvu termínu nebo kusu v servisu vrací 409. */
@@ -45,7 +50,7 @@ public class RentalController {
     public RentalResponse createRental(@Valid @RequestBody RentalCreateRequest request) {
         return RentalResponse.from(rentalService.createRental(
                 request.customerId(), request.plannedStart(), request.plannedEnd(), request.equipmentItemIds(),
-                request.depositAmountOrZero(), request.discountAmountOrZero()));
+                request.depositAmountOrZero(), request.discountAmountOrZero()), LocalDateTime.now(clock));
     }
 
     /** Vrácení jednoho kusu z výpůjčky (částečné vracení). */
@@ -56,6 +61,6 @@ public class RentalController {
             @RequestBody(required = false) ItemReturnRequest request
     ) {
         return RentalResponse.from(rentalService.returnItem(
-                rentalId, rentalItemId, request != null ? request.returnedAt() : null));
+                rentalId, rentalItemId, request != null ? request.returnedAt() : null), LocalDateTime.now(clock));
     }
 }

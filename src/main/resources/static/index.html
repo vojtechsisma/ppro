@@ -18,6 +18,8 @@
     <div class="topbar-menu" id="topbarMenu">
       <nav class="topnav" aria-label="Hlavní navigace">
         <a href="/" aria-current="page">Přehled</a>
+        <a href="/rentals.html">Výpůjčky</a>
+        <a href="/reservations.html">Rezervace</a>
         <a href="/customers.html">Zákazníci</a>
         <a href="/categories.html">Ceník</a>
       </nav>
@@ -61,6 +63,22 @@
 
       <aside class="rail" aria-label="Detail a souhrn">
         <section class="rail-section" id="itemDetail" hidden aria-live="polite"></section>
+
+        <section class="rail-section">
+          <div class="rail-head">
+            <span class="rail-title">Dnes vydat</span>
+            <a class="hv-eyebrow rail-link" href="/reservations.html">Rezervace</a>
+          </div>
+          <div id="todayPickups" class="rail-list"><span class="rail-hint">Načítám…</span></div>
+        </section>
+
+        <section class="rail-section">
+          <div class="rail-head">
+            <span class="rail-title">Po termínu</span>
+            <a class="hv-eyebrow rail-link" href="/rentals.html">Výpůjčky</a>
+          </div>
+          <div id="overdueRentals" class="rail-list"><span class="rail-hint">Načítám…</span></div>
+        </section>
 
         <section class="rail-section">
           <div class="rail-head">

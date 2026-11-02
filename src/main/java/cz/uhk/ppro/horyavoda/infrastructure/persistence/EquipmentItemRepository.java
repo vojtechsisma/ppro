@@ -36,6 +36,11 @@ public interface EquipmentItemRepository extends JpaRepository<EquipmentItem, Lo
     @Query("select e from EquipmentItem e join fetch e.category where e.id in :ids order by e.id")
     List<EquipmentItem> findAllByIdForUpdate(Collection<Long> ids);
 
+    /** Kusy kategorie se zámkem – kapacita typu se počítá nad zamčenými kusy (velikost filtruje volající). */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select e from EquipmentItem e join fetch e.category where e.category.id = :categoryId order by e.id")
+    List<EquipmentItem> findAllByCategoryIdForUpdate(long categoryId);
+
     /**
      * Filtrovaný přehled vybavení seřazený podle inventárního čísla.
      * Každý filtr je volitelný (null = nefiltrovat).

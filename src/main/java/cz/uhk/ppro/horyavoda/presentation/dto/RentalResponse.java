@@ -17,17 +17,19 @@ public record RentalResponse(
         BigDecimal discountAmount,
         BigDecimal totalLateFee,
         RentalStatus status,
+        boolean overdue,
         LocalDateTime createdAt,
         List<RentalItemResponse> items
 ) {
 
-    public static RentalResponse from(Rental rental) {
+    /** Příznak „po termínu“ se vyhodnocuje k danému okamžiku. */
+    public static RentalResponse from(Rental rental, LocalDateTime now) {
         return new RentalResponse(
                 rental.getId(), rental.getCustomer().getId(),
                 rental.getCustomer().getLastName() + " " + rental.getCustomer().getFirstName(),
                 rental.getPlannedStart(), rental.getPlannedEnd(),
                 rental.getDepositAmount(), rental.getDiscountAmount(), rental.getTotalLateFee(),
-                rental.getStatus(), rental.getCreatedAt(),
+                rental.getStatus(), rental.isOverdueAt(now), rental.getCreatedAt(),
                 rental.getItems().stream().map(RentalItemResponse::from).toList());
     }
 }

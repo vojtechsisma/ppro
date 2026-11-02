@@ -119,6 +119,15 @@ public class Rental {
         return item;
     }
 
+    /** Po termínu je výpůjčka, ve které po plánovaném konci zůstává venku aspoň jeden kus. */
+    public boolean isOverdueAt(LocalDateTime now) {
+        return now.isAfter(plannedEnd) && items.stream().anyMatch(RentalItem::isOut);
+    }
+
+    public boolean isOpen() {
+        return status == RentalStatus.ACTIVE || status == RentalStatus.RETURNED_PARTIAL;
+    }
+
     /** Součet penále za všechny dosud vrácené kusy. */
     public BigDecimal getTotalLateFee() {
         return items.stream().map(RentalItem::getLateFee).reduce(BigDecimal.ZERO, BigDecimal::add);

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rezervace | Hory a voda</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 74 100'%3E%3Crect width='74' height='100' rx='5.9' ry='6' fill='%231F6B7A'/%3E%3Ccircle cx='37' cy='15.5' r='5.5' fill='%23F7F5F0'/%3E%3Cpolygon points='11.84,70 31.97,42.4 41.03,55.6 48.07,49 62.16,70' fill='%23fff'/%3E%3Crect x='11.84' y='77' width='50.32' height='4.5' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="/" class="topbar-brand" aria-label="Hory a voda – přehled">
+      <span class="mark" aria-hidden="true"><i></i></span>
+      <span class="wordmark-name">Hory a voda</span>
+    </a>
+    <button type="button" class="topbar-toggle" id="menuToggle" aria-expanded="false" aria-controls="topbarMenu">Menu</button>
+    <div class="topbar-menu" id="topbarMenu">
+      <nav class="topnav" aria-label="Hlavní navigace">
+        <a href="/">Přehled</a>
+        <a href="/rentals.html">Výpůjčky</a>
+        <a href="/reservations.html" aria-current="page">Rezervace</a>
+        <a href="/customers.html">Zákazníci</a>
+        <a href="/categories.html">Ceník</a>
+      </nav>
+      <span class="topbar-clock" id="topbarClock"></span>
+      <div class="topbar-user">
+        <span class="user-name" id="userNameDisplay"></span>
+        <button id="logoutBtn" class="hv-btn hv-btn--ghost">Odhlásit</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1 class="hv-display page-title">Rezervace</h1>
+        <p class="page-sub">Rezervace drží počet kusů dané kategorie a velikosti, konkrétní kus se vybere při výdeji. Ranní rezervace drží do 10:00, propadne v 10:30.</p>
+      </div>
+      <button id="openReservationModalBtn" class="hv-btn hv-btn--primary hv-btn--lg">Nová rezervace</button>
+    </div>
+
+    <section class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Dnes vydat</h2>
+        <span class="hv-eyebrow" id="todayLabel"></span>
+      </div>
+      <div class="hv-card"><div class="table-scroll">
+        <table class="hv-table hv-table--stack">
+          <thead><tr><th>Vyzvednout</th><th>Zákazník</th><th>Typ</th><th>Drží do</th><th>Stav</th><th class="col-number"><span class="visually-hidden">Akce</span></th></tr></thead>
+          <tbody id="todayTableBody"><tr><td colspan="6" class="table-message">Načítám…</td></tr></tbody>
+        </table>
+      </div></div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Nadcházející</h2>
+      </div>
+      <div class="hv-card"><div class="table-scroll">
+        <table class="hv-table hv-table--stack">
+          <thead><tr><th>Od – do</th><th>Zákazník</th><th>Typ</th><th>Cena / den</th><th>Stav</th><th class="col-number"><span class="visually-hidden">Akce</span></th></tr></thead>
+          <tbody id="upcomingTableBody"><tr><td colspan="6" class="table-message">Načítám…</td></tr></tbody>
+        </table>
+      </div></div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Uzavřené</h2>
+        <span class="hv-eyebrow">vydané, propadlé a zrušené</span>
+      </div>
+      <div class="hv-card"><div class="table-scroll">
+        <table class="hv-table hv-table--stack">
+          <thead><tr><th>Od – do</th><th>Zákazník</th><th>Typ</th><th>Stav</th></tr></thead>
+          <tbody id="closedTableBody"><tr><td colspan="4" class="table-message">Načítám…</td></tr></tbody>
+        </table>
+      </div></div>
+    </section>
+  </main>
+
+  <div id="reservationModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reservationModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="reservationModalTitle">Nová rezervace</h3>
+        <button type="button" class="modal-close" data-close aria-label="Zavřít">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>
+        </button>
+      </div>
+      <form id="reservationForm">
+        <div class="modal-body">
+          <div class="alert alert-danger"></div>
+          <div class="form-grid">
+            <label class="hv-field span-2">
+              <span class="hv-label">Zákazník</span>
+              <select id="reservationCustomer" class="hv-input" required></select>
+            </label>
+            <label class="hv-field">
+              <span class="hv-label">Kategorie</span>
+              <select id="reservationCategory" class="hv-input" required></select>
+            </label>
+            <label class="hv-field">
+              <span class="hv-label">Velikost</span>
+              <select id="reservationSize" class="hv-input" required></select>
+            </label>
+            <label class="hv-field">
+              <span class="hv-label">Počet kusů</span>
+              <input type="number" id="reservationQuantity" class="hv-input num" min="1" max="20" value="1" required>
+            </label>
+            <span class="hv-field" aria-hidden="true"></span>
+            <label class="hv-field">
+              <span class="hv-label">Od</span>
+              <input type="datetime-local" id="reservationStart" class="hv-input num" required>
+            </label>
+            <label class="hv-field">
+              <span class="hv-label">Do</span>
+              <input type="datetime-local" id="reservationEnd" class="hv-input num" required>
+            </label>
+          </div>
+          <span class="hv-help" id="reservationHoldHint"></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="hv-btn hv-btn--ghost" data-close>Zrušit</button>
+          <button type="submit" id="reservationSubmitBtn" class="hv-btn hv-btn--primary">Rezervovat</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="pickupModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pickupModalTitle">
+    <div class="modal-card modal-card--wide">
+      <div class="modal-header">
+        <h3 id="pickupModalTitle">Výdej rezervace</h3>
+        <button type="button" class="modal-close" data-close aria-label="Zavřít">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>
+        </button>
+      </div>
+      <form id="pickupForm">
+        <div class="modal-body">
+          <div class="alert alert-danger"></div>
+          <p class="detail-meta" id="pickupSummary"></p>
+          <div class="tag-grid tag-grid--pick" id="pickupItemPicker"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="hv-btn hv-btn--ghost" data-close>Zrušit</button>
+          <button type="submit" id="pickupSubmitBtn" class="hv-btn hv-btn--primary hv-btn--lg">Vydat</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/reservations.js"></script>
+</body>
+</html>

@@ -415,7 +415,7 @@ select.hv-input {
   overflow: hidden;
 }
 
-.table-scroll { overflow-x: auto; }
+.table-scroll { position: relative; overflow-x: auto; }
 
 .hv-table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
 .hv-table th {
@@ -656,6 +656,120 @@ select.hv-input {
 
 .rail-hint { font-size: 13px; color: var(--ink-3); }
 
+.rail-link { text-decoration: none; }
+.rail-link:hover { color: var(--lake); }
+
+.rail-list { display: flex; flex-direction: column; }
+.rail-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: var(--sp-3);
+  align-items: baseline;
+  padding: 8px 0;
+  border-top: 1px solid var(--paper-2);
+  color: var(--ink);
+  text-decoration: none;
+}
+.rail-row:first-child { border-top: none; padding-top: 0; }
+.rail-row:hover .rail-row-name { color: var(--lake); }
+.rail-row:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.rail-row-time {
+  font: 700 var(--fs-14)/1.3 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.rail-row.is-late .rail-row-time { color: var(--st-late); }
+.rail-row-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rail-row-name { font-weight: 600; font-size: var(--fs-14); }
+.rail-row-meta { font-size: 13px; color: var(--ink-2); }
+.rail-row-meta .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* --- Výpůjčky: karta jako vratný list, řádek na každý kus --- */
+.rental-list { display: flex; flex-direction: column; gap: var(--sp-3); }
+
+.rental-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.rental-head-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px var(--sp-3);
+  min-width: 0;
+}
+.rental-id {
+  font: 600 var(--fs-12)/1.2 var(--font-mono);
+  letter-spacing: .04em;
+  color: var(--ink-3);
+}
+.rental-customer { font-weight: 700; font-size: var(--fs-16); }
+.rental-term { font-size: var(--fs-14); color: var(--ink-2); }
+
+.return-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--paper-2);
+  border-left: 3px solid transparent;
+}
+.return-row:has(.return-status.is-late) { border-left-color: var(--st-late); background: #F8E6E359; }
+.return-no {
+  font: 700 var(--fs-16)/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.return-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.return-name { font-weight: 600; font-size: var(--fs-14); }
+.return-name .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.return-status { font-size: 13px; color: var(--ink-2); }
+.return-status.is-late { color: var(--st-late); font-weight: 600; }
+.return-fee {
+  font: 600 var(--fs-14)/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.return-fee.is-late { color: var(--st-late); }
+
+.rental-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  background: var(--paper);
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.rental-fee { font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.rental-fee.is-late, .rental-fee.is-late .num { color: var(--st-late); }
+.rental-fee .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+
+/* --- Rezervace: oddíly s tabulkami --- */
+.section-block { display: flex; flex-direction: column; gap: var(--sp-3); }
+.section-head { display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap; }
+.section-title { font-size: var(--fs-20); font-weight: 700; }
+
+.row-actions { display: inline-flex; justify-content: flex-end; align-items: center; gap: var(--sp-1); white-space: nowrap; }
+
+/* Širší dialog s výběrem kusů */
+.modal-card--wide { max-width: 760px; }
+.tag-grid--pick {
+  grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 3px;
+}
+.tag-grid--pick .hv-tag::after { display: none; }
+.tag-grid--pick .hv-tag[aria-pressed="true"] { background: var(--lake-tint); outline-color: var(--lake); }
+
 /* --- Upozornění --- */
 .alert {
   display: none;
@@ -792,6 +906,10 @@ select.hv-input {
   .board-main { border-right: none; border-bottom: 1px solid var(--line); }
 }
 
+@media (max-width: 1000px) and (min-width: 751px) {
+  .topbar .wordmark-name { display: none; }
+}
+
 @media (max-width: 900px) {
   .topbar-clock { display: none; }
 }
@@ -852,6 +970,31 @@ select.hv-input {
   .form-grid { grid-template-columns: minmax(0, 1fr); }
   .form-grid .span-2 { grid-column: auto; }
   .modal-overlay { padding-top: var(--sp-4); }
+  .rental-head { flex-direction: column; }
+
+  /* Tabulka se na telefonu skládá do řádků: popisek vlevo, hodnota vpravo */
+  .hv-table--stack thead { display: none; }
+  .hv-table--stack tr { display: block; padding: 12px var(--sp-4); border-bottom: 1px solid var(--paper-2); }
+  .hv-table--stack tbody tr:last-child { border-bottom: none; }
+  .hv-table--stack td {
+    display: block;
+    padding: 3px 0;
+    border: none;
+    text-align: right;
+  }
+  .hv-table--stack td::after { content: ''; display: table; clear: both; }
+  .hv-table--stack td[data-label]::before {
+    content: attr(data-label);
+    float: left;
+    margin-right: var(--sp-3);
+    font: 600 var(--fs-12)/1.7 var(--font-sans);
+    color: var(--ink-3);
+  }
+  .hv-table--stack td.col-number { padding-top: var(--sp-2); }
+  .hv-table--stack td.table-message { display: block; text-align: center; }
+  .hv-table--stack tbody tr:hover td { background: none; }
+  .return-row { grid-template-columns: minmax(0, 1fr) auto; padding: 12px var(--sp-4); }
+  .return-no { grid-column: 1 / -1; }
 }
 
 @media print {

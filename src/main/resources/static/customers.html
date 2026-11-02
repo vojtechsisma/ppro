@@ -18,6 +18,8 @@
     <div class="topbar-menu" id="topbarMenu">
       <nav class="topnav" aria-label="Hlavní navigace">
         <a href="/">Přehled</a>
+        <a href="/rentals.html">Výpůjčky</a>
+        <a href="/reservations.html">Rezervace</a>
         <a href="/customers.html" aria-current="page">Zákazníci</a>
         <a href="/categories.html">Ceník</a>
       </nav>
@@ -35,6 +37,7 @@
         <h1 class="hv-display page-title">Zákazníci</h1>
         <p class="page-sub">Evidence zákazníků pro smlouvy o výpůjčce.</p>
       </div>
+      <button id="openCustomerModalBtn" class="hv-btn hv-btn--primary hv-btn--lg">Přidat zákazníka</button>
     </div>
 
     <div class="toolbar">
@@ -64,6 +67,45 @@
       </div>
     </section>
   </main>
+
+  <div id="customerModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="customerModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="customerModalTitle">Nový zákazník</h3>
+        <button type="button" class="modal-close" data-close aria-label="Zavřít">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>
+        </button>
+      </div>
+      <form id="customerForm">
+        <div class="modal-body">
+          <div class="alert alert-danger"></div>
+          <div class="form-grid">
+            <label class="hv-field">
+              <span class="hv-label">Jméno</span>
+              <input type="text" id="customerFirstName" class="hv-input" required minlength="2" maxlength="50" autocomplete="off">
+            </label>
+            <label class="hv-field">
+              <span class="hv-label">Příjmení</span>
+              <input type="text" id="customerLastName" class="hv-input" required minlength="2" maxlength="50" autocomplete="off">
+            </label>
+            <label class="hv-field">
+              <span class="hv-label">Telefon</span>
+              <input type="tel" id="customerPhone" class="hv-input num" required minlength="6" maxlength="20" placeholder="+420 …" autocomplete="off">
+            </label>
+            <label class="hv-field">
+              <span class="hv-label">Číslo dokladu</span>
+              <input type="text" id="customerDocument" class="hv-input num" required minlength="4" maxlength="30" autocomplete="off">
+              <span class="hv-help">Občanka nebo pas, kontroluje se při výdeji.</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="hv-btn hv-btn--secondary" data-close>Zrušit</button>
+          <button type="submit" class="hv-btn hv-btn--primary" id="customerSubmitBtn">Uložit zákazníka</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="/js/common.js"></script>
   <script src="/js/customers.js"></script>

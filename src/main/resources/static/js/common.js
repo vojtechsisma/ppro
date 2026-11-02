@@ -52,6 +52,93 @@ function formatDate(isoDateTime) {
   return new Date(isoDateTime).toLocaleDateString('cs-CZ');
 }
 
+function formatMoney(value) {
+  return `${formatPrice(value)} Kč`;
+}
+
+function pad2(number) {
+  return String(number).padStart(2, '0');
+}
+
+// Čas z API je místní čas bez zóny („2027-01-23T08:30:00“)
+function formatTime(isoDateTime) {
+  const date = new Date(isoDateTime);
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+}
+
+// Formát z pultu: „So 23. 1. 08:30“
+function formatDateTime(isoDateTime) {
+  const date = new Date(isoDateTime);
+  return `${WEEKDAYS[date.getDay()]} ${date.getDate()}. ${date.getMonth() + 1}. ${formatTime(isoDateTime)}`;
+}
+
+function isSameDay(first, second) {
+  return first.getFullYear() === second.getFullYear()
+    && first.getMonth() === second.getMonth()
+    && first.getDate() === second.getDate();
+}
+
+// Hodnota pro <input type="datetime-local">
+function toDateTimeInputValue(date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+}
+
+function toApiDateTime(inputValue) {
+  return inputValue.length === 16 ? `${inputValue}:00` : inputValue;
+}
+
+// Počet započatých dní po termínu (stejné pravidlo jako penále na serveru)
+function startedDaysLate(plannedEnd, now = new Date()) {
+  const lateMs = now - new Date(plannedEnd);
+  return lateMs > 0 ? Math.ceil(lateMs / 86400000) : 0;
+}
+
+function daysWord(count) {
+  if (count === 1) return 'den';
+  if (count >= 2 && count <= 4) return 'dny';
+  return 'dní';
+}
+
+async function readErrorDetail(res, fallback) {
+  try {
+    const data = await res.json();
+    return data.detail || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// Dialog: otevření, zavření tlačítky, klepnutím mimo a klávesou Esc
+function setupDialog(modal) {
+  const close = () => modal.classList.remove('active');
+  modal.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', close));
+  modal.addEventListener('click', event => {
+    if (event.target === modal) close();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && modal.classList.contains('active')) close();
+  });
+  return {
+    open: () => modal.classList.add('active'),
+    close,
+    alert: message => {
+      const box = modal.querySelector('.alert');
+      box.textContent = message;
+      box.style.display = message ? 'block' : 'none';
+    }
+  };
+}
+
+async function loadCustomerOptions(select) {
+  const res = await apiRequest('/api/customers');
+  if (!res || !res.ok) return [];
+  const customers = await res.json();
+  select.innerHTML = '<option value="">Vyberte zákazníka</option>' + customers
+    .map(c => `<option value="${c.id}">${escapeHtml(c.last_name)} ${escapeHtml(c.first_name)} · ${escapeHtml(c.phone)}</option>`)
+    .join('');
+  return customers;
+}
+
 const WEEKDAYS = ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'];
 
 // Formát z pultu: „Po 20. 10. 2026 · 08:12“

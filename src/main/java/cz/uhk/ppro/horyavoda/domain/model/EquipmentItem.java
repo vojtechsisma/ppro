@@ -103,6 +103,11 @@ public class EquipmentItem {
         }
     }
 
+    /** Kus může vstoupit do výpůjčky (není v servisu ani vyřazený). */
+    public boolean isUsableForRental() {
+        return status != ItemStatus.IN_SERVICE && status != ItemStatus.RETIRED;
+    }
+
     /** Kus se vydal zákazníkovi. */
     void handOver() {
         this.status = ItemStatus.RENTED;

@@ -62,9 +62,56 @@ const formStatus = document.getElementById('formStatus');
 // --- Inicializace ---
 document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
+  loadCounterAgenda();
   await loadCategories();
   await loadEquipment();
 });
+
+// --- Pult: kdo dnes přijde a kdo nevrátil ---
+
+async function loadCounterAgenda() {
+  const [reservationsRes, rentalsRes] = await Promise.all([
+    apiRequest('/api/reservations'),
+    apiRequest('/api/rentals')
+  ]);
+  if (reservationsRes && reservationsRes.ok) renderTodayPickups(await reservationsRes.json());
+  if (rentalsRes && rentalsRes.ok) renderOverdueRentals(await rentalsRes.json());
+}
+
+function renderTodayPickups(reservations) {
+  const now = new Date();
+  const today = reservations
+    .filter(r => r.status === 'ACTIVE' && (isSameDay(new Date(r.planned_start), now) || new Date(r.planned_start) < now));
+  document.getElementById('todayPickups').innerHTML = today.length === 0
+    ? '<span class="rail-hint">Dnes nikdo nepřijede pro rezervaci.</span>'
+    : today.map(r => `
+      <a class="rail-row" href="/reservations.html">
+        <span class="rail-row-time num">${formatTime(r.planned_start)}</span>
+        <span class="rail-row-main">
+          <span class="rail-row-name">${escapeHtml(r.customer_name)}</span>
+          <span class="rail-row-meta">${escapeHtml(r.category_name)} <span class="num">${escapeHtml(r.size)}</span>${r.quantity > 1 ? ` <span class="num">× ${r.quantity}</span>` : ''}</span>
+        </span>
+      </a>`).join('');
+}
+
+function renderOverdueRentals(rentals) {
+  const overdue = rentals.filter(r => r.overdue);
+  document.getElementById('overdueRentals').innerHTML = overdue.length === 0
+    ? '<span class="rail-hint">Všechno je vráceno včas.</span>'
+    : overdue.map(r => {
+      const out = r.items.filter(i => i.status === 'RENTED');
+      const daysLate = startedDaysLate(r.planned_end);
+      const fee = out.reduce((sum, i) => sum + daysLate * Number(i.unit_daily_price), Number(r.total_late_fee));
+      return `
+      <a class="rail-row is-late" href="/rentals.html">
+        <span class="rail-row-time num">+${daysLate} d</span>
+        <span class="rail-row-main">
+          <span class="rail-row-name">${escapeHtml(r.customer_name)}</span>
+          <span class="rail-row-meta">venku ${out.map(i => escapeHtml(i.inventory_number)).join(', ')} · penále zatím <span class="num">${formatMoney(fee)}</span></span>
+        </span>
+      </a>`;
+    }).join('');
+}
 
 async function loadCategories() {
   const res = await fetch('/api/categories');

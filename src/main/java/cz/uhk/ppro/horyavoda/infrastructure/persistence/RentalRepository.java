@@ -11,15 +11,15 @@ import java.util.Optional;
 public interface RentalRepository extends JpaRepository<Rental, Long> {
 
     @Override
-    @EntityGraph(attributePaths = {"customer", "items", "items.equipmentItem"})
+    @EntityGraph(attributePaths = {"customer", "items", "items.equipmentItem", "items.equipmentItem.category"})
     Optional<Rental> findById(Long id);
 
-    @EntityGraph(attributePaths = {"customer", "items", "items.equipmentItem"})
+    @EntityGraph(attributePaths = {"customer", "items", "items.equipmentItem", "items.equipmentItem.category"})
     @Query("select r from Rental r order by r.plannedStart desc")
     List<Rental> findAllNewestFirst();
 
     /** Historie výpůjček jednoho kusu, nejnovější první. */
-    @EntityGraph(attributePaths = {"customer", "items", "items.equipmentItem"})
+    @EntityGraph(attributePaths = {"customer", "items", "items.equipmentItem", "items.equipmentItem.category"})
     @Query("""
             select distinct r from Rental r join r.items ri
             where ri.equipmentItem.id = :equipmentItemId

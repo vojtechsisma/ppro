@@ -40,6 +40,7 @@ public class DataSeeder implements ApplicationRunner {
     private final EquipmentItemRepository equipmentItemRepository;
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DemoDataSeeder demoDataSeeder;
 
     public DataSeeder(
             SeedProperties seedProperties,
@@ -47,7 +48,8 @@ public class DataSeeder implements ApplicationRunner {
             CategoryRepository categoryRepository,
             EquipmentItemRepository equipmentItemRepository,
             CustomerRepository customerRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            DemoDataSeeder demoDataSeeder
     ) {
         this.seedProperties = seedProperties;
         this.userRepository = userRepository;
@@ -55,6 +57,7 @@ public class DataSeeder implements ApplicationRunner {
         this.equipmentItemRepository = equipmentItemRepository;
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
+        this.demoDataSeeder = demoDataSeeder;
     }
 
     @Override
@@ -67,6 +70,9 @@ public class DataSeeder implements ApplicationRunner {
         seedCategories();
         seedEquipment();
         seedCustomers();
+        if (seedProperties.demoData()) {
+            demoDataSeeder.seed();
+        }
         log.info("Syntetická data byla úspěšně nahrána.");
     }
 

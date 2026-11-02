@@ -11,8 +11,9 @@ class StaticPagesTest extends ApiIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "/index.html", "/login.html", "/customers.html", "/categories.html",
-            "/css/style.css", "/js/common.js", "/js/app.js", "/js/customers.js", "/js/categories.js"
+            "/index.html", "/login.html", "/customers.html", "/categories.html", "/rentals.html", "/reservations.html",
+            "/css/style.css", "/js/common.js", "/js/app.js", "/js/customers.js", "/js/categories.js",
+            "/js/rentals.js", "/js/reservations.js"
     })
     void frontendResourceIsServedWithoutToken(String path) throws Exception {
         mockMvc.perform(get(path)).andExpect(status().isOk());
