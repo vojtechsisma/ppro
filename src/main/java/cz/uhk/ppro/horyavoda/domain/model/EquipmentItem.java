@@ -1,5 +1,7 @@
 package cz.uhk.ppro.horyavoda.domain.model;
 
+import cz.uhk.ppro.horyavoda.domain.exception.DomainException;
+import cz.uhk.ppro.horyavoda.domain.exception.ItemInServiceException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -85,7 +87,32 @@ public class EquipmentItem {
 
     /** Převedení kusu do servisní blokace – po dobu servisu se nesmí půjčit ani rezervovat. */
     public void sendToService() {
+        if (isRented()) {
+            throw new ItemInServiceException("Kus " + inventoryNumber + " je venku u zákazníka, do servisu může až po vrácení.");
+        }
         this.status = ItemStatus.IN_SERVICE;
+    }
+
+    /** Ověří, že kus lze zařadit do výpůjčky: kus v servisu ani vyřazený kus se nepůjčuje. */
+    public void ensureRentable() {
+        if (status == ItemStatus.IN_SERVICE) {
+            throw new ItemInServiceException("Nelze půjčit: kus " + inventoryNumber + " je v servisu.");
+        }
+        if (status == ItemStatus.RETIRED) {
+            throw new DomainException("Nelze půjčit: kus " + inventoryNumber + " je vyřazený z půjčování.");
+        }
+    }
+
+    /** Kus se vydal zákazníkovi. */
+    void handOver() {
+        this.status = ItemStatus.RENTED;
+    }
+
+    /** Kus se vrátil na pult a je znovu k dispozici. */
+    void returnToStock() {
+        if (status == ItemStatus.RENTED) {
+            this.status = ItemStatus.AVAILABLE;
+        }
     }
 
     public boolean isRented() {

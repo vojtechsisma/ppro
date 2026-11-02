@@ -102,7 +102,7 @@ function setupMobileMenu() {
       toggle.focus();
     }
   });
-  window.matchMedia('(min-width: 641px)').addEventListener('change', event => {
+  window.matchMedia('(min-width: 751px)').addEventListener('change', event => {
     if (event.matches) setOpen(false);
   });
 }

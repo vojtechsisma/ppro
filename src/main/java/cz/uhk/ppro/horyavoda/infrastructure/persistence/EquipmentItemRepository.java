@@ -2,12 +2,16 @@ package cz.uhk.ppro.horyavoda.infrastructure.persistence;
 
 import cz.uhk.ppro.horyavoda.domain.model.EquipmentItem;
 import cz.uhk.ppro.horyavoda.domain.model.ItemStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -23,6 +27,14 @@ public interface EquipmentItemRepository extends JpaRepository<EquipmentItem, Lo
     List<EquipmentItem> findAll(Specification<EquipmentItem> specification, Sort sort);
 
     boolean existsByInventoryNumber(String inventoryNumber);
+
+    /**
+     * Načte kusy se zámkem pro zápis. Dvě souběžné výpůjčky téhož kusu se tak seřadí
+     * za sebou a druhá už uvidí první – překryv termínů nevznikne ani při souběhu.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select e from EquipmentItem e join fetch e.category where e.id in :ids order by e.id")
+    List<EquipmentItem> findAllByIdForUpdate(Collection<Long> ids);
 
     /**
      * Filtrovaný přehled vybavení seřazený podle inventárního čísla.

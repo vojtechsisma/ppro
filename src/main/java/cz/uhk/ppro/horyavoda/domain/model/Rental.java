@@ -1,5 +1,7 @@
 package cz.uhk.ppro.horyavoda.domain.model;
 
+import cz.uhk.ppro.horyavoda.domain.exception.DomainException;
+import cz.uhk.ppro.horyavoda.domain.exception.EntityNotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,6 +63,9 @@ public class Rental {
     }
 
     public Rental(Customer customer, LocalDateTime plannedStart, LocalDateTime plannedEnd, BigDecimal depositAmount) {
+        if (!plannedEnd.isAfter(plannedStart)) {
+            throw new DomainException("Konec výpůjčky musí být později než její začátek.");
+        }
         this.customer = customer;
         this.plannedStart = plannedStart;
         this.plannedEnd = plannedEnd;
@@ -74,11 +79,49 @@ public class Rental {
         }
     }
 
-    /** Přidá kus do výpůjčky se snapshotem aktuálně sjednané denní ceny. */
+    /**
+     * Přidá kus do výpůjčky se snapshotem aktuálně sjednané denní ceny.
+     * Kus v servisu ani vyřazený kus přidat nelze; kontrolu překryvu s jinými
+     * výpůjčkami dělá aplikační služba, protože potřebuje data z úložiště.
+     */
     public RentalItem addItem(EquipmentItem equipmentItem, BigDecimal unitDailyPrice) {
+        equipmentItem.ensureRentable();
+        boolean alreadyIncluded = items.stream()
+                .anyMatch(item -> item.getEquipmentItem().getId().equals(equipmentItem.getId()));
+        if (alreadyIncluded) {
+            throw new DomainException("Kus " + equipmentItem.getInventoryNumber() + " je ve výpůjčce dvakrát.");
+        }
         RentalItem item = new RentalItem(this, equipmentItem, unitDailyPrice);
         items.add(item);
         return item;
+    }
+
+    /** Výdej na pultu: všechny kusy výpůjčky jsou od teď venku. */
+    public void handOverItems() {
+        items.forEach(item -> item.getEquipmentItem().handOver());
+    }
+
+    /**
+     * Vrácení jednoho kusu. Výpůjčka zůstává otevřená, dokud se nevrátí poslední kus;
+     * do té doby je ve stavu RETURNED_PARTIAL.
+     */
+    public RentalItem returnItem(long rentalItemId, LocalDateTime returnedAt) {
+        if (status == RentalStatus.CANCELLED || status == RentalStatus.COMPLETED) {
+            throw new DomainException("Výpůjčka č. " + id + " je uzavřená, kus z ní nelze vrátit.");
+        }
+        RentalItem item = items.stream()
+                .filter(candidate -> candidate.getId().equals(rentalItemId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Položka " + rentalItemId + " ve výpůjčce č. " + id + " není."));
+        item.markReturned(returnedAt);
+        status = items.stream().anyMatch(RentalItem::isOut) ? RentalStatus.RETURNED_PARTIAL : RentalStatus.COMPLETED;
+        return item;
+    }
+
+    /** Součet penále za všechny dosud vrácené kusy. */
+    public BigDecimal getTotalLateFee() {
+        return items.stream().map(RentalItem::getLateFee).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public Long getId() {
@@ -105,16 +148,16 @@ public class Rental {
         return discountAmount;
     }
 
+    /** Sleva je na uvážení vedoucího, jen nesmí být záporná. */
     public void setDiscountAmount(BigDecimal discountAmount) {
+        if (discountAmount.signum() < 0) {
+            throw new DomainException("Sleva nemůže být záporná.");
+        }
         this.discountAmount = discountAmount;
     }
 
     public RentalStatus getStatus() {
         return status;
-    }
-
-    public void setStatus(RentalStatus status) {
-        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -2,6 +2,7 @@ package cz.uhk.ppro.horyavoda.application.service;
 
 import cz.uhk.ppro.horyavoda.domain.exception.EntityAlreadyExistsException;
 import cz.uhk.ppro.horyavoda.domain.exception.EntityNotFoundException;
+import cz.uhk.ppro.horyavoda.domain.exception.HistoryProtectedException;
 import cz.uhk.ppro.horyavoda.domain.exception.ItemInServiceException;
 import cz.uhk.ppro.horyavoda.domain.model.Category;
 import cz.uhk.ppro.horyavoda.domain.model.EquipmentItem;
@@ -9,6 +10,7 @@ import cz.uhk.ppro.horyavoda.domain.model.ItemStatus;
 import cz.uhk.ppro.horyavoda.domain.model.WearCondition;
 import cz.uhk.ppro.horyavoda.infrastructure.persistence.CategoryRepository;
 import cz.uhk.ppro.horyavoda.infrastructure.persistence.EquipmentItemRepository;
+import cz.uhk.ppro.horyavoda.infrastructure.persistence.RentalItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +25,16 @@ public class EquipmentService {
 
     private final EquipmentItemRepository equipmentItemRepository;
     private final CategoryRepository categoryRepository;
+    private final RentalItemRepository rentalItemRepository;
 
-    public EquipmentService(EquipmentItemRepository equipmentItemRepository, CategoryRepository categoryRepository) {
+    public EquipmentService(
+            EquipmentItemRepository equipmentItemRepository,
+            CategoryRepository categoryRepository,
+            RentalItemRepository rentalItemRepository
+    ) {
         this.equipmentItemRepository = equipmentItemRepository;
         this.categoryRepository = categoryRepository;
+        this.rentalItemRepository = rentalItemRepository;
     }
 
     // --- KATEGORIE ---
@@ -112,14 +120,20 @@ public class EquipmentService {
         return item;
     }
 
-    /** Smazání kusu z fondu; zapůjčený kus smazat nelze. */
+    /**
+     * Smazání kusu z fondu – jen pro omylem zaevidovaný kus bez historie.
+     * Kus, který se už půjčoval, se nemaže (historie slouží k reklamacím a obměně), ale vyřadí.
+     */
     public void deleteEquipment(long itemId) {
         EquipmentItem item = getEquipment(itemId);
         if (item.isRented()) {
             throw new ItemInServiceException("Nelze smazat kus, který je právě zapůjčen zákazníkovi.");
         }
+        if (rentalItemRepository.existsByEquipmentItemId(itemId)) {
+            throw new HistoryProtectedException("Kus " + item.getInventoryNumber()
+                    + " má historii výpůjček, proto se nemaže. Vyřaďte ho změnou stavu na Vyřazeno.");
+        }
         equipmentItemRepository.delete(item);
-        // Okamžitý flush: porušení FK (kus s historií výpůjček) se projeví zde, ne až při commitu.
         equipmentItemRepository.flush();
     }
 }

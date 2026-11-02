@@ -5,6 +5,8 @@ import cz.uhk.ppro.horyavoda.domain.exception.DomainException;
 import cz.uhk.ppro.horyavoda.domain.exception.DoubleBookingException;
 import cz.uhk.ppro.horyavoda.domain.exception.EntityAlreadyExistsException;
 import cz.uhk.ppro.horyavoda.domain.exception.EntityNotFoundException;
+import cz.uhk.ppro.horyavoda.domain.exception.HistoryProtectedException;
+import cz.uhk.ppro.horyavoda.domain.exception.ItemInServiceException;
 import cz.uhk.ppro.horyavoda.presentation.dto.ErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -28,7 +30,12 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
-    @ExceptionHandler({EntityAlreadyExistsException.class, DoubleBookingException.class})
+    @ExceptionHandler({
+            EntityAlreadyExistsException.class,
+            DoubleBookingException.class,
+            ItemInServiceException.class,
+            HistoryProtectedException.class
+    })
     public ResponseEntity<ErrorResponse> handleConflict(DomainException exception) {
         return error(HttpStatus.CONFLICT, exception.getMessage());
     }

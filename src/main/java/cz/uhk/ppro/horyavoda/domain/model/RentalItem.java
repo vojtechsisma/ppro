@@ -1,5 +1,6 @@
 package cz.uhk.ppro.horyavoda.domain.model;
 
+import cz.uhk.ppro.horyavoda.domain.exception.DomainException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -60,6 +61,44 @@ public class RentalItem {
         this.rental = rental;
         this.equipmentItem = equipmentItem;
         this.unitDailyPrice = unitDailyPrice;
+    }
+
+    /**
+     * Zda položka v intervalu [from, to) drží svůj kus. Kus je obsazený od plánovaného začátku
+     * výpůjčky do skutečného vrácení; dokud se nevrátí, drží se do plánovaného konce a po termínu
+     * neomezeně (kus je fyzicky venku). Zrušená výpůjčka kus nedrží.
+     */
+    public boolean blocksEquipmentBetween(LocalDateTime from, LocalDateTime to, LocalDateTime now) {
+        if (rental.getStatus() == RentalStatus.CANCELLED) {
+            return false;
+        }
+        LocalDateTime occupiedTo;
+        if (actualReturnedAt != null) {
+            occupiedTo = actualReturnedAt;
+        } else if (now.isAfter(rental.getPlannedEnd())) {
+            occupiedTo = LocalDateTime.MAX;
+        } else {
+            occupiedTo = rental.getPlannedEnd();
+        }
+        return rental.getPlannedStart().isBefore(to) && from.isBefore(occupiedTo);
+    }
+
+    /** Vrácení tohoto kusu; penále se počítá jen za jeho vlastní dny prodlení. */
+    void markReturned(LocalDateTime returnedAt) {
+        if (status != RentalItemStatus.RENTED) {
+            throw new DomainException("Kus " + equipmentItem.getInventoryNumber() + " už byl vrácen.");
+        }
+        if (returnedAt.isBefore(rental.getPlannedStart())) {
+            throw new DomainException("Čas vrácení nemůže být před začátkem výpůjčky.");
+        }
+        this.actualReturnedAt = returnedAt;
+        this.lateFee = LateFeePolicy.lateFee(rental.getPlannedEnd(), returnedAt, unitDailyPrice);
+        this.status = RentalItemStatus.RETURNED;
+        equipmentItem.returnToStock();
+    }
+
+    public boolean isOut() {
+        return status == RentalItemStatus.RENTED;
     }
 
     public Long getId() {
