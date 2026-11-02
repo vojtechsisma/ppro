@@ -187,6 +187,43 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .topbar-brand:hover { color: var(--white); }
 .topbar-brand .wordmark-name { font-size: 15px; letter-spacing: .01em; }
 
+/* Na širokém displeji menu jen řadí položky do lišty, na telefonu se z něj stává rozbalovací panel */
+.topbar-menu {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  height: var(--hit-min);
+  margin-left: auto;
+  padding: 0 12px;
+  border: 1px solid #FFFFFF33;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--white);
+  font: 600 var(--fs-14)/1 var(--font-sans);
+  cursor: pointer;
+}
+.topbar-toggle::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform var(--dur) var(--ease);
+}
+.topbar-toggle[aria-expanded="true"]::after { margin-top: 3px; transform: rotate(-135deg); }
+.topbar-toggle[aria-expanded="true"] { background: #FFFFFF14; }
+.topbar-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
 .topnav {
   display: flex;
   gap: 2px;
@@ -761,9 +798,47 @@ select.hv-input {
 
 @media (max-width: 640px) {
   .topbar { gap: var(--sp-3); padding: 0 var(--sp-4); }
-  .topbar-brand .wordmark-name { display: none; }
-  .topbar-user { padding-left: var(--sp-2); }
-  .topbar-user .user-name { display: none; }
+  .topbar-toggle { display: inline-flex; }
+
+  .topbar-menu {
+    position: absolute;
+    top: var(--topbar-h);
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: var(--sp-2) var(--sp-4) var(--sp-4);
+    background: var(--ink);
+    border-top: 1px solid #FFFFFF1F;
+    box-shadow: var(--shadow-overlay);
+  }
+  .topbar-menu.is-open { display: flex; }
+
+  .topnav { flex-direction: column; gap: 2px; overflow: visible; }
+  .topnav a {
+    display: flex;
+    align-items: center;
+    min-height: var(--control-h-lg);
+    padding: 0 12px;
+    font-size: var(--fs-16);
+  }
+
+  .topbar-clock {
+    display: block;
+    padding: var(--sp-3) 12px 0;
+    margin-top: var(--sp-2);
+    border-top: 1px solid #FFFFFF1F;
+    font-size: 13px;
+  }
+
+  .topbar-user {
+    justify-content: space-between;
+    padding: var(--sp-2) 0 0 12px;
+    border-left: none;
+  }
+  .topbar .topbar-user .hv-btn--ghost { height: var(--hit-min); font-size: var(--fs-14); }
   .page { padding: var(--sp-5) var(--sp-4) var(--sp-7); }
   .page-title { font-size: var(--fs-24); }
   .board-main, .rail { padding: var(--sp-4); }

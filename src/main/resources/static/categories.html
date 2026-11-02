@@ -14,15 +14,18 @@
       <span class="mark" aria-hidden="true"><i></i></span>
       <span class="wordmark-name">Hory a voda</span>
     </a>
-    <nav class="topnav" aria-label="Hlavní navigace">
-      <a href="/">Přehled</a>
-      <a href="/customers.html">Zákazníci</a>
-      <a href="/categories.html" aria-current="page">Ceník</a>
-    </nav>
-    <span class="topbar-clock" id="topbarClock"></span>
-    <div class="topbar-user">
-      <span class="user-name" id="userNameDisplay"></span>
-      <button id="logoutBtn" class="hv-btn hv-btn--ghost">Odhlásit</button>
+    <button type="button" class="topbar-toggle" id="menuToggle" aria-expanded="false" aria-controls="topbarMenu">Menu</button>
+    <div class="topbar-menu" id="topbarMenu">
+      <nav class="topnav" aria-label="Hlavní navigace">
+        <a href="/">Přehled</a>
+        <a href="/customers.html">Zákazníci</a>
+        <a href="/categories.html" aria-current="page">Ceník</a>
+      </nav>
+      <span class="topbar-clock" id="topbarClock"></span>
+      <div class="topbar-user">
+        <span class="user-name" id="userNameDisplay"></span>
+        <button id="logoutBtn" class="hv-btn hv-btn--ghost">Odhlásit</button>
+      </div>
     </div>
   </header>
 

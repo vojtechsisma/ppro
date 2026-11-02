@@ -78,8 +78,38 @@ async function loadTopbarUser() {
   }
 }
 
+// Na telefonu se navigace schová pod tlačítko Menu
+function setupMobileMenu() {
+  const toggle = document.getElementById('menuToggle');
+  const menu = document.getElementById('topbarMenu');
+  if (!toggle || !menu) return;
+
+  const setOpen = open => {
+    menu.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  };
+
+  toggle.addEventListener('click', () => setOpen(!menu.classList.contains('is-open')));
+  menu.addEventListener('click', event => {
+    if (event.target.closest('a')) setOpen(false);
+  });
+  document.addEventListener('click', event => {
+    if (!event.target.closest('.topbar')) setOpen(false);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && menu.classList.contains('is-open')) {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+  window.matchMedia('(min-width: 641px)').addEventListener('change', event => {
+    if (event.matches) setOpen(false);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('logoutBtn').addEventListener('click', logout);
+  setupMobileMenu();
   startTopbarClock();
   loadTopbarUser();
 });
